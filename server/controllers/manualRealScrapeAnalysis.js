@@ -1,47 +1,47 @@
-import { getPosts } from "../services/ManualTruthScrapingService.js";
-import { analyzePostWithGPT } from "../services/gptService.js";
+// import { getPosts } from "../services/ManualTruthScrapingService.js";
+// import { analyzePostWithGPT } from "../services/gptService.js";
 import Post from "../models/postModel2.js";
 
 // 🧠 One-time run: scrape + analyze
-export const runManualScraperOnce = async (req, res) => {
-  const { username = "realdonaldtrump" } = req.body;
+// export const runManualScraperOnce = async (req, res) => {
+//   const { username = "realdonaldtrump" } = req.body;
 
-  try {
-    const posts = await getPosts();
+//   try {
+//     const posts = await getPosts();
 
-    for (const post of posts) {
-      const exists = await Post.findOne({ content: post.text });
-      if (exists) continue;
+//     for (const post of posts) {
+//       const exists = await Post.findOne({ content: post.text });
+//       if (exists) continue;
 
-      await Post.create({
-        username,
-        content: post.text,
-        url: post.postUrl,
-        createdAt: new Date(post.uploadTime),
-        fetchedAt: new Date(post.fetchedAt),
-      });
-    }
+//       await Post.create({
+//         username,
+//         content: post.text,
+//         url: post.postUrl,
+//         createdAt: new Date(post.uploadTime),
+//         fetchedAt: new Date(post.fetchedAt),
+//       });
+//     }
 
-    const unprocessed = await Post.find({ gptResponse: { $exists: false } });
+//     const unprocessed = await Post.find({ gptResponse: { $exists: false } });
 
-    for (const post of unprocessed) {
-      try {
-        const gptResponse = await analyzePostWithGPT(post.content);
-        post.gptResponse = gptResponse;
-        post.gptAnsweredAt = new Date();
-        await post.save();
-      } catch (err) {
-        console.error("GPT analysis error:", err.message);
-      }
-    }
+//     for (const post of unprocessed) {
+//       try {
+//         const gptResponse = await analyzePostWithGPT(post.content);
+//         post.gptResponse = gptResponse;
+//         post.gptAnsweredAt = new Date();
+//         await post.save();
+//       } catch (err) {
+//         console.error("GPT analysis error:", err.message);
+//       }
+//     }
 
-    res.json({ success: true, message: "Manual scraping & GPT analysis completed." });
+//     res.json({ success: true, message: "Manual scraping & GPT analysis completed." });
 
-  } catch (err) {
-    console.error("Manual scraper error:", err.message);
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+//   } catch (err) {
+//     console.error("Manual scraper error:", err.message);
+//     res.status(500).json({ success: false, error: err.message });
+//   }
+// };
 
 // 📦 Get latest scraped + analyzed posts
 export const getManualScrapedPosts = async (req, res) => {

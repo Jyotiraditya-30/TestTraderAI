@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const PostSchema = new mongoose.Schema({
+  postId: { type: String, required: true, unique: true }, // <- Added
   username: String,
   content: String,
   url: String,

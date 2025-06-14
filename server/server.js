@@ -29,6 +29,10 @@ app.use(express.urlencoded({ extended: true }));
 // // app.use('/api', scraperRoutes);
 // app.use('/manual', manualScraperRoutes);
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'running', time: new Date().toISOString() });
+});
+
 app.use('/api/manual', manualScraperRoutes);
 app.use('/api/truth', truthRoutes);
 app.use('/api/scrape', scrapeRoutes);
