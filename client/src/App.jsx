@@ -30,87 +30,91 @@
 
 //+++++++++++++++++++++++++++ update 2 ++++++++++++++++++++++++++++++++//
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { CssBaseline, Box, Toolbar } from "@mui/material";
+import { CssBaseline, Box, useMediaQuery } from "@mui/material";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
+import { DrawerProvider, useDrawer } from "./contexts/DrawerContext";
 
 import Header from "./components/Header";
 import SideNavigation from "./components/Sidebar";
 import AppRoutes from "./Routes";
 
-// import "./App.css";
+import { useTheme } from "@mui/material/styles";
 
 const theme = createTheme();
-const drawerWidth = 240;
+const drawerWidth = 220;
+const miniDrawerWidth = 60;
 
 function AppContent() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("social-scraper");
   const location = useLocation();
+  const { open } = useDrawer();
+  const [activeTab, setActiveTab] = useState("social-scraper");
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   useEffect(() => {
-    if (location.pathname === "/social-scraper") {
-      setActiveTab("social-scraper");
-    } else if (location.pathname === "/analyze-scraper") {
-      setActiveTab("analyze-scraper");
-    }
-    else if (location.pathname === "/analyze-scraper") {
-      setActiveTab("analyze-scraper");
-    }
-    else if (location.pathname === "/realtime-scraper") {
-      setActiveTab("realtime-scraper");
-    } 
-    else if (location.pathname === "/realtime-analysis") {
-      setActiveTab("realtime-analysis");
-    } 
-    else if (location.pathname === "/SelfAutomated") {
-      setActiveTab("Self Automated");
-    } 
-    else {
-      setActiveTab("social-scraper");
-    }
+    const path = location.pathname;
+    if (path.includes("analyze-scraper")) setActiveTab("analyze-scraper");
+    else if (path.includes("realtime-scraper")) setActiveTab("realtime-scraper");
+    else if (path.includes("realtime-analysis")) setActiveTab("realtime-analysis");
+    else if (path.includes("SelfAutomated")) setActiveTab("Self Automated");
+    else setActiveTab("social-scraper");
   }, [location.pathname]);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const sidebarWidth = isDesktop
+    ? drawerWidth
+    : isTablet
+      ? open
+        ? drawerWidth // overlay mode, shouldn't shift content
+        : miniDrawerWidth
+      : 0;
 
- return (
-  <div>
-    <CssBaseline />
-    <Header handleDrawerToggle={handleDrawerToggle} />
-    <Box sx={{ display: 'flex' }}>
-      <SideNavigation
-        mobileOpen={mobileOpen}
-        handleDrawerToggle={handleDrawerToggle}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: '64px', // adjust if Header height differs
-          height: `calc(100vh - 64px)`,
-          overflow: 'hidden',
-          p: 2,
-        }}
-      >
-        <AppRoutes />
+  const shouldPushContent = isDesktop || (isTablet && !open); // ✅ Don't push if tablet + open
+
+  return (
+    <>
+      <CssBaseline />
+      <Header />
+      <Box sx={{ display: "flex" }}>
+        <SideNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            mt: "64px",
+            height: "calc(100vh - 64px)",
+            overflow: "auto",
+            p: 2, // always padding 2
+            pl: isTablet && open ? `${miniDrawerWidth}px` : 1, // only apply on tablet open
+            width: shouldPushContent
+              ? `calc(100% - ${sidebarWidth}px)`
+              : "100%",
+            ml: shouldPushContent
+              ? `${sidebarWidth}px`
+              : 0,
+          }}
+        >
+          <AppRoutes />
+        </Box>
       </Box>
-    </Box>
-  </div>
-);
+    </>
+  );
 }
+
+
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <Router>
-        <AppContent />
-      </Router>
-    </ThemeProvider>
+    <DrawerProvider>
+      <ThemeProvider theme={theme}>
+        <Router>
+          <AppContent />
+        </Router>
+      </ThemeProvider>
+    </DrawerProvider>
   );
 }
 

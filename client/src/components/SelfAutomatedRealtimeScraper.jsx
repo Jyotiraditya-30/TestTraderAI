@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 
 const POLL_INTERVAL = 10000; // every 10 seconds
-const BACKEND_URL = "http://3.83.254.0:3000/api/manual/posts";
+const BACKEND_URL = "http://localhost:3000/api/manual/posts";
 
 function SelfAutomatedRealtimeScraper() {
   const [posts, setPosts] = useState([]);
@@ -23,7 +23,7 @@ function SelfAutomatedRealtimeScraper() {
   const fetchPosts = async () => {
     try {
       const res = await axios.get(BACKEND_URL);
-            console.log("posts",res.data)
+      console.log("posts", res.data)
       setPosts(res.data.posts || []);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -45,20 +45,24 @@ function SelfAutomatedRealtimeScraper() {
   return (
     <Box
       sx={{
-        height: "100%",
-        width: "100%",
+        height: "85vh",
+        maxWidth: "90vw",
+        overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
+        px: { xs: 1, sm: 2, md: 3 }, // horizontal padding
+        pt: 1,
+        boxSizing: "border-box",
       }}
     >
       {/* Header */}
       <Paper
         elevation={3}
         sx={{
-          p: { xs: 2, sm: 3 },
+          p: { xs: 2, sm: 3, md:4 },
           borderRadius: 2,
           background: "#fff",
-          boxShadow: "0 1px 8px 0 rgba(21, 101, 192, 0.1)",
+          boxShadow: "0 1px 8px rgba(21, 101, 192, 0.1)",
           mb: 2,
         }}
       >
@@ -82,23 +86,16 @@ function SelfAutomatedRealtimeScraper() {
           flexDirection: "column",
           background: "#fff",
           borderRadius: 2,
-          boxShadow: "0 1px 8px 0 rgba(21, 101, 192, 0.1)",
-          height: "calc(100vh - 120px)",
+          boxShadow: "0 1px 8px rgba(21, 101, 192, 0.1)",
           overflow: "hidden",
         }}
       >
         <TableContainer
           sx={{
             flexGrow: 1,
-            width: "100%",
-            height: "100%",
-            overflowX: "auto",
-            overflowY: "auto",
+            overflow: "auto",
             background: "#f5f9fd",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
+            "&::-webkit-scrollbar": { display: "none" },
             "&:hover::-webkit-scrollbar": {
               height: "6px",
             },
@@ -109,106 +106,102 @@ function SelfAutomatedRealtimeScraper() {
           }}
         >
           <Table
-                      stickyHeader
-                      sx={{
-                        width: "100%",
-                        minWidth: 1100,
-                        tableLayout: "auto",
-                      }}
-                    >
-                      <TableHead>
-                        <TableRow>
-                          {[
-                            "S.No",
-                            "Post",
-                            "URL",
-                            "Posted At",
-                            "Fetched At",
-                            "GPT Analysis",
-                            "GPT Answered At",
-                          ].map((label, i) => (
-                            <TableCell
-                              key={i}
-                              sx={{
-                                position: "sticky",
-                                top: 0,
-                                backgroundColor: "#e3f2fd",
-                                fontWeight: "bold",
-                                zIndex: 1,
-                                textAlign: "center",
-                                whiteSpace: "nowrap",
-                                minWidth: label === "S.No" ? 60 : 150,
-                              }}
-                            >
-                              {label}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {loading ? (
-                          <TableRow>
-                            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                              <CircularProgress size={24} color="primary" />
-                            </TableCell>
-                          </TableRow>
-                        ) : posts.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={7} align="center" sx={{ py: 4, color: "#94a3b8" }}>
-                              No posts found.
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          posts.map((post, idx) => (
-                            <TableRow key={post._id} hover>
-                              <TableCell align="center">{idx + 1}</TableCell>
-                              <TableCell sx={{ wordBreak: "break-word", maxWidth: 600 }}>
-                                {post.content}
-                              </TableCell>
-                              <TableCell style={{ textAlign: "center" }}>
-                                <a
-                                  href={post.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    color: "#1976d2",
-                                    fontWeight: 500,
-                                    textDecoration: "underline",
-                                    display: "inline-block",
-                                    wordBreak: "break-word",
-                                    maxWidth: 200,
-                                  }}
-                                  title={post.url}
-                                >
-                                  LINK
-                                </a>
-                              </TableCell>
-                              <TableCell sx={{ whiteSpace: "nowrap", minWidth: 180 }}>
-                                {post.createdAt
-                                  ? new Date(post.createdAt).toLocaleString()
-                                  : "-"}
-                              </TableCell>
-                              <TableCell sx={{ whiteSpace: "nowrap", minWidth: 180 }}>
-                                {post.fetchedAt
-                                  ? new Date(post.fetchedAt).toLocaleString()
-                                  : "-"}
-                              </TableCell>
-                              <TableCell sx={{ wordBreak: "break-word", maxWidth: 600 }}>
-                                {post.gptResponse || "-"}
-                              </TableCell>
-                              <TableCell sx={{ whiteSpace: "nowrap", minWidth: 180 }}>
-                                {post.gptAnsweredAt
-                                  ? new Date(post.gptAnsweredAt).toLocaleString()
-                                  : "-"}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
+            stickyHeader
+            sx={{
+              minWidth: 1100,
+              tableLayout: "auto",
+              // width: "100%",
+              maxWidth: "90vw"
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {[
+                  "S.No",
+                  "Post",
+                  "URL",
+                  "Posted At",
+                  "Fetched At",
+                  "GPT Analysis",
+                  "GPT Answered At",
+                ].map((label, i) => (
+                  <TableCell
+                    key={i}
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      backgroundColor: "#e3f2fd",
+                      fontWeight: "bold",
+                      zIndex: 1,
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      px: 1.5,
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={24} color="primary" />
+                  </TableCell>
+                </TableRow>
+              ) : posts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center" sx={{ py: 4, color: "#94a3b8" }}>
+                    No posts found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                posts.map((post, idx) => (
+                  <TableRow key={post._id} hover>
+                    <TableCell align="center">{idx + 1}</TableCell>
+                    <TableCell sx={{ wordBreak: "break-word", maxWidth: 400, px: 1 }}>
+                      {post.content}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", px: 1 }}>
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#1976d2",
+                          fontWeight: 500,
+                          textDecoration: "underline",
+                          wordBreak: "break-word",
+                          display: "inline-block",
+                          maxWidth: 100,
+                        }}
+                        title={post.url}
+                      >
+                        LINK
+                      </a>
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", minWidth: 160, px: 1 }}>
+                      {post.createdAt ? new Date(post.createdAt).toLocaleString() : "-"}
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", minWidth: 160, px: 1 }}>
+                      {post.fetchedAt ? new Date(post.fetchedAt).toLocaleString() : "-"}
+                    </TableCell>
+                    <TableCell sx={{ wordBreak: "break-word", maxWidth: 400, px: 1 }}>
+                      {post.gptResponse || "-"}
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap", minWidth: 160, px: 1 }}>
+                      {post.gptAnsweredAt ? new Date(post.gptAnsweredAt).toLocaleString() : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </TableContainer>
       </Box>
     </Box>
+
   );
 }
 
@@ -217,74 +210,171 @@ export default SelfAutomatedRealtimeScraper;
 
 
 // import * as React from 'react';
-// import { styled } from '@mui/material/styles';
+// import PropTypes from 'prop-types';
+// import Box from '@mui/material/Box';
+// import Collapse from '@mui/material/Collapse';
+// import IconButton from '@mui/material/IconButton';
 // import Table from '@mui/material/Table';
 // import TableBody from '@mui/material/TableBody';
-// import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+// import TableCell from '@mui/material/TableCell';
 // import TableContainer from '@mui/material/TableContainer';
 // import TableHead from '@mui/material/TableHead';
 // import TableRow from '@mui/material/TableRow';
+// import Typography from '@mui/material/Typography';
 // import Paper from '@mui/material/Paper';
+// import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+// import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-// const StyledTableCell = styled(TableCell)(({ theme }) => ({
-//   [`&.${tableCellClasses.head}`]: {
-//     backgroundColor: theme.palette.common.black,
-//     color: theme.palette.common.white,
-//   },
-//   [`&.${tableCellClasses.body}`]: {
-//     fontSize: 14,
-//   },
-// }));
-
-// const StyledTableRow = styled(TableRow)(({ theme }) => ({
-//   '&:nth-of-type(odd)': {
-//     backgroundColor: theme.palette.action.hover,
-//   },
-//   // hide last border
-//   '&:last-child td, &:last-child th': {
-//     border: 0,
-//   },
-// }));
-
-// function createData(name, calories, fat, carbs, protein) {
-//   return { name, calories, fat, carbs, protein };
+// function createData(name, calories, fat, carbs, protein, price) {
+//   return {
+//     name,
+//     calories,
+//     fat,
+//     carbs,
+//     protein,
+//     price,
+//     history: [
+//       {
+//         date: '2020-01-05',
+//         customerId: '11091700',
+//         amount: 3,
+//       },
+//       {
+//         date: '2020-01-02',
+//         customerId: 'Anonymous',
+//         amount: 1,
+//       },
+//     ],
+//   };
 // }
 
-// const rows = [
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-// ];
+// function Row(props) {
+//   const { row } = props;
+//   const [open, setOpen] = React.useState(false);
 
-// export default function CustomizedTables() {
 //   return (
-//     <TableContainer component={Paper}>
-//       <Table sx={{ minWidth: 700 }} aria-label="customized table">
-//         <TableHead>
-//           <TableRow>
-//             <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-//             <StyledTableCell align="right">Calories</StyledTableCell>
-//             <StyledTableCell align="right">Fat&nbsp;(g)</StyledTableCell>
-//             <StyledTableCell align="right">Carbs&nbsp;(g)</StyledTableCell>
-//             <StyledTableCell align="right">Protein&nbsp;(g)</StyledTableCell>
-//           </TableRow>
-//         </TableHead>
-//         <TableBody>
-//           {rows.map((row) => (
-//             <StyledTableRow key={row.name}>
-//               <StyledTableCell component="th" scope="row">
-//                 {row.name}
-//               </StyledTableCell>
-//               <StyledTableCell align="right">{row.calories}</StyledTableCell>
-//               <StyledTableCell align="right">{row.fat}</StyledTableCell>
-//               <StyledTableCell align="right">{row.carbs}</StyledTableCell>
-//               <StyledTableCell align="right">{row.protein}</StyledTableCell>
-//             </StyledTableRow>
-//           ))}
-//         </TableBody>
-//       </Table>
-//     </TableContainer>
+//     <React.Fragment>
+//       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+//         <TableCell>
+//           <IconButton
+//             aria-label="expand row"
+//             size="small"
+//             onClick={() => setOpen(!open)}
+//           >
+//             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+//           </IconButton>
+//         </TableCell>
+//         <TableCell component="th" scope="row">
+//           {row.name}
+//         </TableCell>
+//         <TableCell align="right">{row.calories}</TableCell>
+//         <TableCell align="right">{row.fat}</TableCell>
+//         <TableCell align="right">{row.carbs}</TableCell>
+//         <TableCell align="right">{row.protein}</TableCell>
+//       </TableRow>
+//       <TableRow>
+//         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+//           <Collapse in={open} timeout="auto" unmountOnExit>
+//             <Box sx={{ margin: 1 }}>
+//               <Typography variant="h6" gutterBottom component="div">
+//                 History
+//               </Typography>
+//               <Table size="small" aria-label="purchases">
+//                 <TableHead>
+//                   <TableRow>
+//                     <TableCell>Date</TableCell>
+//                     <TableCell>Customer</TableCell>
+//                     <TableCell align="right">Amount</TableCell>
+//                     <TableCell align="right">Total price ($)</TableCell>
+//                   </TableRow>
+//                 </TableHead>
+//                 <TableBody>
+//                   {row.history.map((historyRow) => (
+//                     <TableRow key={historyRow.date}>
+//                       <TableCell component="th" scope="row">
+//                         {historyRow.date}
+//                       </TableCell>
+//                       <TableCell>{historyRow.customerId}</TableCell>
+//                       <TableCell align="right">{historyRow.amount}</TableCell>
+//                       <TableCell align="right">
+//                         {Math.round(historyRow.amount * row.price * 100) / 100}
+//                       </TableCell>
+//                     </TableRow>
+//                   ))}
+//                 </TableBody>
+//               </Table>
+//             </Box>
+//           </Collapse>
+//         </TableCell>
+//       </TableRow>
+//     </React.Fragment>
 //   );
 // }
+
+// // Row.propTypes = {
+// //   row: PropTypes.shape({
+// //     calories: PropTypes.number.isRequired,
+// //     carbs: PropTypes.number.isRequired,
+// //     fat: PropTypes.number.isRequired,
+// //     history: PropTypes.arrayOf(
+// //       PropTypes.shape({
+// //         amount: PropTypes.number.isRequired,
+// //         customerId: PropTypes.string.isRequired,
+// //         date: PropTypes.string.isRequired,
+// //       }),
+// //     ).isRequired,
+// //     name: PropTypes.string.isRequired,
+// //     price: PropTypes.number.isRequired,
+// //     protein: PropTypes.number.isRequired,
+// //   }).isRequired,
+// // };
+
+// // const rows = [
+// //   createData('Frozen yoghurt', 159, 6.0, 24, 4.0, 3.99),
+// //   createData('Ice cream sandwich', 237, 9.0, 37, 4.3, 4.99),
+// //   createData('Eclair', 262, 16.0, 24, 6.0, 3.79),
+// //   createData('Cupcake', 305, 3.7, 67, 4.3, 2.5),
+// //   createData('Gingerbread', 356, 16.0, 49, 3.9, 1.5),
+// // ];
+
+// // export default function CollapsibleTable() {
+// //   return (
+// //     <Box
+// //       sx={{
+// //         width: '100%',
+// //         maxWidth: '100vw',
+// //         overflowX: 'hidden',
+// //         px: 1, // optional padding
+// //       }}
+// //     >
+// //       <Paper
+// //         sx={{
+// //           width: '100%',
+// //           overflowX: 'auto',
+// //         }}
+// //       >
+// //         <Box sx={{ minWidth: 800 }}>
+// //           <Table aria-label="collapsible table">
+// //             <TableHead>
+// //               <TableRow>
+// //                 <TableCell />
+// //                 <TableCell>Dessert (100g serving)</TableCell>
+// //                 <TableCell align="right">Calories</TableCell>
+// //                 <TableCell align="right">Fat&nbsp;(g)</TableCell>
+// //                 <TableCell align="right">Carbs&nbsp;(g)</TableCell>
+// //                 <TableCell align="right">Protein&nbsp;(g)</TableCell>
+// //               </TableRow>
+// //             </TableHead>
+// //             <TableBody>
+// //               {rows.map((row) => (
+// //                 <Row key={row.name} row={row} />
+// //               ))}
+// //             </TableBody>
+// //           </Table>
+// //         </Box>
+// //       </Paper>
+// //     </Box>
+// //   );
+// // }
+
+
