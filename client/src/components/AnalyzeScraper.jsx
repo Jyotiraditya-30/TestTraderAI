@@ -57,13 +57,7 @@ function AnalyzeScraper() {
   };
 
   return (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Box sx={{ height: "85vh", maxWidth: "90vw", overflowX: "hidden", display: "flex", flexDirection: "column", px: { xs: 1, sm: 2, md: 3 }, pt: 1 }}>
       {/* Header Section */}
       <Paper
         elevation={3}

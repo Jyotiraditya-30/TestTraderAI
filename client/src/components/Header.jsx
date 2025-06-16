@@ -126,12 +126,12 @@ function Header() {
     setLoading(true);
     try {
       if (!isScraperRunning) {
-        await axios.post("http://3.83.254.0:3000/api/realtime/scraper/start", {
+        await axios.post("http://localhost:3000/api/realtime/scraper/start", {
           username: "realdonaldtrump",
           intervalInMs: 60000,
         });
       } else {
-        await axios.post("http://3.83.254.0:3000/api/realtime/scraper/stop");
+        await axios.post("http://localhost:3000/api/realtime/scraper/stop");
       }
       setIsScraperRunning(!isScraperRunning);
     } catch (error) {

@@ -148,6 +148,7 @@ const analyzeUnprocessedPosts = async () => {
 
 // 🟢 Start real-time loop
 export const startScraperLoop = async (req, res) => {
+    console.log("Started");
     const { username = "realdonaldtrump", intervalInMs = 60000 } = req.body;
 
     if (scraperIntervalId) {

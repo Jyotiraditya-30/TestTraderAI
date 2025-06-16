@@ -490,7 +490,7 @@ const PROFILE_HANDLE = process.env.PROFILE_HANDLE || 'realDonaldTrump';
 const PROFILE_URL = `https://truthsocial.com/@${PROFILE_HANDLE}`;
 const LAST_POST_PATH = path.resolve(__dirname, 'latest.json');
 const CHECK_INTERVAL_MS = parseInt(process.env.CHECK_INTERVAL_MS || '60000');
-const MAX_HISTORY = 50;
+const MAX_HISTORY = 5;
 const MAX_VISIBLE_POSTS = 3;
 
 let browser = null;
