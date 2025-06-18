@@ -480,6 +480,7 @@ import { fileURLToPath } from 'url';
 import { analyzePostWithTogetherAI } from "./togetherAiService.js";
 import Post from "../models/postModel2.js";
 import { sendNewPostNotification } from './EmailService.js';
+import { sendNewPostWhatsApp } from './WhatsappService.js';
 
 dotenv.config();
 puppeteer.use(StealthPlugin());
@@ -619,51 +620,11 @@ async function startWatcherLoop() {
           continue;
         }
 
-        // let gptResponse = null;
-        // try {
-        //   gptResponse = await analyzePostWithTogetherAI(post.text);
-        // } catch (err) {
-        //   console.error("❌ GPT error:", err.message);
-        // }
-
-        // await Post.create({
-        //   postId: post.postId,
-        //   username: PROFILE_HANDLE,
-        //   content: post.text,
-        //   url: post.postUrl,
-        //   createdAt: new Date(post.uploadTime),
-        //   fetchedAt: new Date(post.fetchedAt),
-        //   gptResponse,
-        //   gptAnsweredAt: new Date(),
-        // });
-
-        // console.log("✅ Saved to MongoDB with GPT analysis.");
-
-        // // await sendNewPostNotification(post, gptResponse);
-        // const firstLine = gptResponse.trim().split('\n')[0].trim();
-
-        // if (
-        //   typeof gptResponse === 'string' &&
-        //   /^([A-Za-z]\))?\s*yes[,.\- ]+this post is related to the stock market/i.test(firstLine)
-        // ) {
-        //   await sendNewPostNotification(post, gptResponse);
-        // } else {
-        //   console.log("🚫 Post not related to stock market, notification skipped.");
-        // }
-
         let gptResponse = null;
-        let parsedResponse = null;
         try {
-          const rawResponse = await analyzePostWithTogetherAI(post.text);
-          parsedResponse = JSON.parse(rawResponse);  // parse GPT JSON
-          gptResponse = parsedResponse; // you can also store rawResponse if needed
+          gptResponse = await analyzePostWithTogetherAI(post.text);
         } catch (err) {
-          console.error("❌ GPT or JSON parse error:", err.message);
-        }
-
-        if (!parsedResponse) {
-          console.log("⚠️ Skipping post due to GPT failure.");
-          continue;
+          console.error("❌ GPT error:", err.message);
         }
 
         await Post.create({
@@ -673,21 +634,64 @@ async function startWatcherLoop() {
           url: post.postUrl,
           createdAt: new Date(post.uploadTime),
           fetchedAt: new Date(post.fetchedAt),
-          gptResponse: JSON.stringify(gptResponse),  // this is now structured JSON
+          gptResponse,
           gptAnsweredAt: new Date(),
         });
 
         console.log("✅ Saved to MongoDB with GPT analysis.");
+        // await sendNewPostWhatsApp(post, gptResponse);
 
-        // Notification logic
+        // await sendNewPostNotification(post, gptResponse);
+        const firstLine = gptResponse.trim().split('\n')[0].trim();
+
         if (
-          parsedResponse.A &&
-          parsedResponse.A.toLowerCase().startsWith("yes")
+          typeof gptResponse === 'string' &&
+          /^([A-Za-z]\))?\s*yes[,.\- ]+this post is related to the stock market/i.test(firstLine)
         ) {
-          await sendNewPostNotification(post, parsedResponse);
+          // await sendNewPostNotification(post, gptResponse);
+          await sendNewPostWhatsApp(post, gptResponse);
         } else {
           console.log("🚫 Post not related to stock market, notification skipped.");
         }
+
+      //   let gptResponse = null;
+      //   let parsedResponse = null;
+      //   try {
+      //     const rawResponse = await analyzePostWithTogetherAI(post.text);
+      //     parsedResponse = JSON.parse(rawResponse);  // parse GPT JSON
+      //     gptResponse = parsedResponse; // you can also store rawResponse if needed
+      //   } catch (err) {
+      //     console.error("❌ GPT or JSON parse error:", err.message);
+      //   }
+
+      //   if (!parsedResponse) {
+      //     console.log("⚠️ Skipping post due to GPT failure.");
+      //     continue;
+      //   }
+
+      //   await Post.create({
+      //     postId: post.postId,
+      //     username: PROFILE_HANDLE,
+      //     content: post.text,
+      //     url: post.postUrl,
+      //     createdAt: new Date(post.uploadTime),
+      //     fetchedAt: new Date(post.fetchedAt),
+      //     gptResponse: JSON.stringify(gptResponse),  // this is now structured JSON
+      //     gptAnsweredAt: new Date(),
+      //   });
+
+      //   console.log("✅ Saved to MongoDB with GPT analysis.");
+
+      //   // Notification logic
+      //   if (
+      //     parsedResponse.A &&
+      //     parsedResponse.A.toLowerCase().startsWith("yes")
+      //   ) {
+      //     await sendNewPostNotification(post, parsedResponse);
+      //     await sendNewPostWhatsApp(post, gptResponse);
+      //   } else {
+      //     console.log("🚫 Post not related to stock market, notification skipped.");
+      //   }
 
 
       }
