@@ -88,7 +88,7 @@ function AppContent() {
             mt: "64px",
             height: "calc(100vh - 64px)",
             overflow: "auto",
-            p: 2, // always padding 2
+            p: 1, // always padding 2
             pl: isTablet && open ? `${miniDrawerWidth}px` : 1, // only apply on tablet open
             width: shouldPushContent
               ? `calc(100% - ${sidebarWidth}px)`

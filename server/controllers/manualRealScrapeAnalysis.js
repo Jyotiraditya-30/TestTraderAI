@@ -43,11 +43,36 @@ import Post from "../models/postModel2.js";
 //   }
 // };
 
-// 📦 Get latest scraped + analyzed posts
+// // 📦 Get latest scraped + analyzed posts
+// export const getManualScrapedPosts = async (req, res) => {
+//   try {
+//     const posts = await Post.find().sort({ createdAt: -1 }).limit(20);
+//     res.status(200).json({ posts });
+//   } catch (err) {
+//     console.error("Fetch error:", err.message);
+//     res.status(500).json({ error: "Failed to fetch posts from DB." });
+//   }
+// };
+
+
 export const getManualScrapedPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }).limit(20);
-    res.status(200).json({ posts });
+    const page = parseInt(req.query.page) || 1;  // page=1 by default
+    const limit = parseInt(req.query.limit) || 20;
+
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      Post.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Post.countDocuments(),
+    ]);
+
+    res.status(200).json({
+      posts,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalPosts: total,
+    });
   } catch (err) {
     console.error("Fetch error:", err.message);
     res.status(500).json({ error: "Failed to fetch posts from DB." });
