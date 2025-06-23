@@ -22,7 +22,9 @@
     "openai": "^5.1.0",
     "puppeteer": "^24.10.0",
     "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-anonymize-ua": "^2.4.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-user-preferences": "^2.4.1",
     "socket.io": "^4.8.1",
     "together-ai": "^0.16.0",
     "twilio": "^5.7.1"
