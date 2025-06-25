@@ -16,7 +16,7 @@ export const analyzePostWithTogetherAI = async (postText) => {
       },
       {
         role: "user",
-        content: `Post: "${postText}"\n\nA) Is this related to the stock market?\nB) If yes, what do you recommend?\nC) Let me know precise tickers if any.\nD) For each item listed in (C), provide a one-word sentiment: Bullish, Bearish, or Neutral.`
+        content: `Post: "${postText}"\n\nA) Is this message related to the stock market?\nA1) Is this a brand-new statement or a continuation/repetition of a previously stated policy or stance by Trump?\nB) If yes, what do you recommend?\nC) Let me know precise tickers if any.\nD) For each ticker in (C), provide one-word sentiment:\n→ Very Bullish, Bullish, Bearish, Very Bearish, or Neutral.\nE) What is the expected time frame of the impact?\n→ Immediate, Short-term, Medium-term, Long-term.`
       }
     ];
 
