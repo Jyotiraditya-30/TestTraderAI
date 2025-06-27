@@ -1341,6 +1341,415 @@
 
 //++++++++++++++++++++++++++++++++++++++ updated with rotational proxies ++++++++++++++++++++++++++++++++++++++++++++++ //
 
+// import puppeteerModule from 'puppeteer-extra';
+// const puppeteer = puppeteerModule.default || puppeteerModule;
+// import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+// import AnonymizeUA from 'puppeteer-extra-plugin-anonymize-ua';
+// import UserPrefsPlugin from 'puppeteer-extra-plugin-user-preferences';
+
+// import fs from 'fs';
+// import path from 'path';
+// import dotenv from 'dotenv';
+// import { fileURLToPath } from 'url';
+
+// import { analyzePostWithGPT } from "./gptService.js";
+// import Post from '../models/postModel2.js';
+// import { sendNewPostNotification } from './EmailService.js';
+// import { sendNewPostWhatsApp } from './WhatsappService.js';
+// import { getSocketIO } from '../socket.js';
+
+// puppeteer.use(StealthPlugin());
+// puppeteer.use(AnonymizeUA());
+// puppeteer.use(UserPrefsPlugin({
+//   userPrefs: {
+//     intl: { accept_languages: 'en-US,en;q=0.9' },
+//     timezone: 'America/New_York',
+//   }
+// }));
+
+// dotenv.config();
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// const PROFILE_HANDLE = process.env.PROFILE_HANDLE || 'realDonaldTrump';
+// const PROFILE_URL = `https://truthsocial.com/@${PROFILE_HANDLE}`;
+// const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
+// const PROFILE_DIR = path.resolve(__dirname, 'puppeteer-profile');
+
+// const LAST_POST_PATH = path.resolve(__dirname, 'latest.json');
+// const CHECK_INTERVAL_MS = parseInt(process.env.CHECK_INTERVAL_MS || '60000');
+// const MAX_HISTORY = 50;
+// const MAX_VISIBLE_POSTS = 3;
+
+// const PROXY_LIST = process.env.PROXY_LIST?.split(',').map(p => p.trim()) || [];
+// const USER_AGENTS = [
+//   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.110 Safari/537.36",
+//   "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+//   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.5615.49 Safari/537.36",
+//   "Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/117.0",
+//   "Mozilla/5.0 (Linux; Android 12; SM-A125F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
+// ];
+
+// function delay(ms) {
+//   return new Promise(res => setTimeout(res, ms));
+// }
+
+// function getRandomElement(arr) {
+//   return arr[Math.floor(Math.random() * arr.length)];
+// }
+
+// function getRandomDelay(minMs, maxMs) {
+//   return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+// }
+
+// function readPostHistory() {
+//   if (!fs.existsSync(LAST_POST_PATH)) return [];
+//   try {
+//     const data = JSON.parse(fs.readFileSync(LAST_POST_PATH, 'utf-8'));
+//     return Array.isArray(data) ? data : [data];
+//   } catch {
+//     return [];
+//   }
+// }
+
+// function savePostHistory(posts) {
+//   fs.writeFileSync(LAST_POST_PATH, JSON.stringify(posts, null, 2));
+// }
+
+// function hasSeenPost(history, postId) {
+//   return history.some(post => post.postId === postId);
+// }
+
+// async function getPosts() {
+//   const userAgent = getRandomElement(USER_AGENTS);
+//   const successLogPath = path.resolve(__dirname, 'proxy_success_log.json');
+//   const COOKIE_META_PATH = path.resolve(__dirname, 'cookie_meta.json');
+
+//   const PROXIES = [
+//     {
+//       ip: 'http://104.239.105.125:6655',
+//       username: 'hsbfilue',
+//       password: 'p0ytnvylp8e0'
+//     },
+//     {
+//       ip: 'http://104.239.105.125:6655',
+//       username: 'ybncrorx',
+//       password: 't44turw1a264'
+//     }
+//   ];
+
+//   // const webshareProxy = 'http://p.webshare.io:80';
+//   // const proxyUsername = 'txjehvsx-rotate';
+//   // const proxyPassword = 'dcafycd7e4f5';
+
+//   const updateProxyLog = (ip, status) => {
+//     let log = {};
+//     if (fs.existsSync(successLogPath)) {
+//       log = JSON.parse(fs.readFileSync(successLogPath, 'utf8'));
+//     }
+//     log[ip] = status;
+//     fs.writeFileSync(successLogPath, JSON.stringify(log, null, 2));
+//   };
+
+//   const readCookieMeta = () => {
+//     if (!fs.existsSync(COOKIE_META_PATH)) return null;
+//     try {
+//       return JSON.parse(fs.readFileSync(COOKIE_META_PATH, 'utf8'));
+//     } catch {
+//       return null;
+//     }
+//   };
+
+//   const writeCookieMeta = (ip) => {
+//     fs.writeFileSync(COOKIE_META_PATH, JSON.stringify({ proxyIp: ip }, null, 2));
+//   };
+
+//   for (let attempt = 0; attempt < 3; attempt++) {
+//     let browser = null;
+//     let publicIP = 'unknown';
+
+//     const proxy = getRandomElement(PROXIES);
+//     try {
+//       const launchArgs = [
+//         '--no-sandbox',
+//         '--disable-setuid-sandbox',
+//       ];
+
+//       browser = await puppeteer.launch({
+//         headless: false,
+//         userDataDir: PROFILE_DIR,
+//         timeout: 60000,
+//         args: launchArgs
+//       });
+
+//       const page = await browser.newPage();
+
+//       await page.authenticate({
+//         username: proxy.username,
+//         password: proxy.password
+//       });
+
+//       // await page.authenticate({
+//       //   username: proxyUsername,
+//       //   password: proxyPassword
+//       // });
+
+//       await page.setUserAgent(userAgent);
+//       await page.setViewport({
+//         width: 1280 + Math.floor(Math.random() * 100),
+//         height: 800 + Math.floor(Math.random() * 100)
+//       });
+
+//       await page.setExtraHTTPHeaders({
+//         'Accept-Language': 'en-US,en;q=0.9',
+//         'Sec-CH-UA': '"Chromium";v="114", "Not.A/Brand";v="8"',
+//         'Sec-CH-UA-Mobile': '?0',
+//         'Sec-CH-UA-Platform': '"Windows"'
+//       });
+
+//       await delay(getRandomDelay(3000, 6000));
+
+//       // Get IP and print
+//       try {
+//         await page.goto('https://api.ipify.org', { waitUntil: 'networkidle2', timeout: 15000 });
+//         publicIP = await page.evaluate(() => document.body.innerText.trim());
+//         console.log(`🌐 Public IP: ${publicIP}`);
+//       } catch (ipErr) {
+//         console.warn('⚠️ Could not retrieve IP:', ipErr.message);
+//       }
+
+//       // Load cookies if IP matches
+//       const meta = readCookieMeta();
+//       if (fs.existsSync(COOKIES_PATH) && meta?.proxyIp === publicIP) {
+//         try {
+//           const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf8'));
+//           await page.setCookie(...cookies);
+//           console.log('🍪 Loaded cookies (same IP)');
+//         } catch (err) {
+//           console.warn('⚠️ Failed to load cookies:', err.message);
+//         }
+//       } else {
+//         console.log('🚫 Skipping cookie load (IP mismatch or new IP)');
+//       }
+
+//       await delay(getRandomDelay(3000, 5000));
+
+//       // Load TruthSocial profile page
+//       await Promise.race([
+//         page.goto(PROFILE_URL, { waitUntil: 'networkidle2', timeout: 40000 }),
+//         new Promise((_, reject) =>
+//           setTimeout(() => reject(new Error('⏱️ page.goto timeout')), 45000)
+//         )
+//       ]);
+
+//       // Check if blocked or empty
+//       const isBlockedOrEmpty = await page.evaluate(() => {
+//         const title = document.title.toLowerCase();
+//         const bodyText = document.body.innerText.toLowerCase();
+//         return (
+//           title.includes('attention required') ||
+//           bodyText.includes('verifying you are human') ||
+//           bodyText.includes('you are being rate limited') ||
+//           bodyText.includes('sorry, you have been blocked') ||
+//           bodyText.includes('no truths') ||
+//           bodyText.length < 500
+//         );
+//       });
+
+//       if (isBlockedOrEmpty) {
+//         console.warn(`🛑 Blocked or no valid content from TruthSocial [${publicIP}]`);
+//         updateProxyLog(publicIP, 'blocked/empty');
+//         await browser.close();
+//         continue; // Try again
+//       }
+
+//       console.log(`✅ SUCCESS — Page loaded [${publicIP}]`);
+//       updateProxyLog(publicIP, 'success');
+
+//       // Smooth scroll to reveal posts hidden below pinned truth
+//       await page.evaluate(async () => {
+//         const sleep = ms => new Promise(res => setTimeout(res, ms));
+//         let tries = 0;
+//         while (document.querySelectorAll('[data-id]').length < 4 && tries < 10) {
+//           window.scrollBy(0, 300);
+//           await sleep(400);
+//           tries++;
+//         }
+//       });
+
+
+//       try {
+//         await page.waitForSelector('[data-id]', { timeout: 15000 });
+//       } catch (err) {
+//         console.warn(`⚠️ No post selector found — skipping [${publicIP}]`);
+//         await browser.close();
+//         continue;
+//       }
+
+//       const posts = await page.evaluate((PROFILE_HANDLE) => {
+//         // const wrappers = Array.from(document.querySelectorAll('[data-id]')).slice(0, 3);
+//         const allWrappers = Array.from(document.querySelectorAll('[data-id]'));
+
+//         const pinnedWrapper = allWrappers.find(wrapper =>
+//           wrapper.innerText.includes('Pinned Truth')
+//         );
+
+//         const nonPinnedWrappers = allWrappers.filter(wrapper =>
+//           !wrapper.innerText.includes('Pinned Truth')
+//         ).slice(0, 3); // Top 3 non-pinned
+
+//         const wrappers = pinnedWrapper
+//           ? [pinnedWrapper, ...nonPinnedWrappers]
+//           : nonPinnedWrappers;
+
+//         const results = [];
+
+//         for (const wrapper of wrappers) {
+//           if (wrapper.querySelector('[data-testid="boosted-status"]')) continue;
+//           const textWrapper = wrapper.querySelector('.status__content-wrapper');
+//           if (!textWrapper) continue;
+
+//           const text = Array.from(textWrapper.querySelectorAll('p'))
+//             .map(p => p.innerText.trim())
+//             .filter(Boolean)
+//             .filter((line, i, arr) => arr.indexOf(line) === i)
+//             .join('\n');
+
+//           const postId = wrapper.getAttribute('data-id');
+//           const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
+//           const time = wrapper.querySelector('time')?.getAttribute('title');
+
+//           results.push({ text, postId, postUrl, uploadTime: time });
+//         }
+
+//         return results;
+//       }, PROFILE_HANDLE);
+
+//       const cookies = await page.cookies();
+//       fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
+//       writeCookieMeta(publicIP);
+
+//       await browser.close();
+
+//       return posts.map(post => ({
+//         ...post,
+//         fetchedAt: new Date().toISOString()
+//       }));
+
+//     } catch (err) {
+//       console.error(`❌ Proxy error [${publicIP}]:`, err.message);
+//       if (browser) await browser.close();
+//       await delay(3000);
+//     }
+//   }
+
+//   console.error('❌ All attempts failed (possibly all proxies blocked or hanging)');
+//   return [];
+// }
+
+
+
+// async function startWatcherLoop() {
+//   console.log('▶️ Starting real-time watcher...');
+
+//   while (true) {
+//     const now = new Date().toLocaleString();
+//     const latestPosts = await getPosts();
+//     const history = readPostHistory();
+
+//     const newPosts = latestPosts
+//       .filter(post => post && post.postId && !hasSeenPost(history, post.postId))
+//       .slice(0, MAX_VISIBLE_POSTS);
+
+//     if (newPosts.length > 0) {
+//       console.log(`\n[${now}] 🟢 ${newPosts.length} new post(s) detected:`);
+
+//       for (const post of newPosts) {
+//         console.log(`🔗 ${post.postUrl}`);
+
+//         const exists = await Post.findOne({ postId: post.postId });
+//         if (exists) {
+//           console.log("✅ Already in DB (postId matched).");
+//           continue;
+//         }
+
+//         let gptResponse = null;
+//         try {
+//           gptResponse = await analyzePostWithGPT(post.text);
+//         } catch (err) {
+//           console.error("❌ GPT error:", err.message);
+//         }
+
+//         await Post.create({
+//           postId: post.postId,
+//           username: PROFILE_HANDLE,
+//           content: post.text,
+//           url: post.postUrl,
+//           createdAt: new Date(post.uploadTime),
+//           fetchedAt: new Date(post.fetchedAt),
+//           gptResponse,
+//           gptAnsweredAt: new Date(),
+//         });
+
+//         console.log("✅ Saved to MongoDB with GPT analysis.");
+
+//         // 🟢 Emit new post to all connected clients
+//         const io = getSocketIO();
+//         io.emit("newPost", {
+//           postId: post.postId,
+//           username: PROFILE_HANDLE,
+//           content: post.text,
+//           url: post.postUrl,
+//           createdAt: new Date(post.uploadTime),
+//           fetchedAt: new Date(post.fetchedAt),
+//           gptResponse,
+//           gptAnsweredAt: new Date(),
+//         });
+
+
+//         const firstLine = gptResponse?.trim().split('\n')[0].trim();
+
+//         const isLikelyRelated = /A\)\s*(Yes|The post|This message could|geopolitical|impacts the market|indirect implications)/i.test(gptResponse)
+//           || /C\)\s*[\s\S]*\b([A-Z]{2,5})\b/.test(gptResponse)  // any ticker-like symbol
+//           || /D\)\s*[\s\S]*(Bullish|Bearish|Neutral)/i.test(gptResponse);  // any sentiment
+
+//         if (typeof gptResponse === 'string' && isLikelyRelated) {
+//           await sendNewPostNotification(post, gptResponse);
+//           await sendNewPostWhatsApp(post, gptResponse);
+//         } else {
+//           console.log("🚫 Post not related to stock market, notification skipped.");
+//         }
+//       }
+
+
+//       newPosts.forEach(post => {
+//         history.push({ ...post, timestamp: new Date().toISOString() });
+//       });
+
+//       if (history.length > MAX_HISTORY) {
+//         history.splice(0, history.length - MAX_HISTORY);
+//       }
+
+//       savePostHistory(history);
+//     } else {
+//       console.log(`[${now}] ⏳ No new posts.`);
+//     }
+
+//     const delayMs = getRandomDelay(60000, 120000); // 30s to 1min
+//     console.log(`🕒 Next check in ${Math.round(delayMs / 1000)} seconds`);
+//     await delay(delayMs);
+//   }
+// }
+
+// export {
+//   startWatcherLoop,
+//   getPosts,
+//   readPostHistory
+// };
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Update ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
+
 import puppeteerModule from 'puppeteer-extra';
 const puppeteer = puppeteerModule.default || puppeteerModule;
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
@@ -1380,7 +1789,7 @@ const PROFILE_DIR = path.resolve(__dirname, 'puppeteer-profile');
 const LAST_POST_PATH = path.resolve(__dirname, 'latest.json');
 const CHECK_INTERVAL_MS = parseInt(process.env.CHECK_INTERVAL_MS || '60000');
 const MAX_HISTORY = 50;
-const MAX_VISIBLE_POSTS = 3;
+const MAX_VISIBLE_POSTS = 6;
 
 const PROXY_LIST = process.env.PROXY_LIST?.split(',').map(p => p.trim()) || [];
 const USER_AGENTS = [
@@ -1421,21 +1830,208 @@ function hasSeenPost(history, postId) {
   return history.some(post => post.postId === postId);
 }
 
+// async function getPosts() {
+//   const userAgent = getRandomElement(USER_AGENTS);
+//   const successLogPath = path.resolve(__dirname, 'proxy_success_logWebShare.json');
+//   const COOKIE_META_PATH = path.resolve(__dirname, 'cookie_meta.json');
+
+//   // const PROXIES = [
+//   //   {
+//   //     ip: 'http://104.239.105.125:6655',
+//   //     username: 'hsbfilue',
+//   //     password: 'p0ytnvylp8e0'
+//   //   }
+//   // ];
+
+//   const webshareProxy = 'http://p.webshare.io:80';
+//   const proxyUsername = 'txjehvsx-rotate';
+//   const proxyPassword = 'dcafycd7e4f5';
+
+//   const updateProxyLog = (ip, status) => {
+//     let log = {};
+//     if (fs.existsSync(successLogPath)) {
+//       log = JSON.parse(fs.readFileSync(successLogPath, 'utf8'));
+//     }
+//     log[ip] = status;
+//     fs.writeFileSync(successLogPath, JSON.stringify(log, null, 2));
+//   };
+
+//   const readCookieMeta = () => {
+//     if (!fs.existsSync(COOKIE_META_PATH)) return null;
+//     try {
+//       return JSON.parse(fs.readFileSync(COOKIE_META_PATH, 'utf8'));
+//     } catch {
+//       return null;
+//     }
+//   };
+
+//   const writeCookieMeta = (ip) => {
+//     fs.writeFileSync(COOKIE_META_PATH, JSON.stringify({ proxyIp: ip }, null, 2));
+//   };
+
+//   // const proxy = getRandomElement(webshareProxy);
+//   let browser;
+
+//   try {
+//     const launchArgs = [
+//       '--no-sandbox',
+//       '--disable-setuid-sandbox',
+//       `--proxy-server=${webshareProxy}`
+//     ];
+
+//     browser = await puppeteer.launch({
+//       headless: false,
+//       userDataDir: PROFILE_DIR,
+//       args: launchArgs
+//     });
+
+//     const page = await browser.newPage();
+
+//     // await page.authenticate({
+//     //   username: proxy.username,
+//     //   password: proxy.password
+//     // });
+
+//     await page.authenticate({
+//       username: proxyUsername,
+//       password: proxyPassword
+//     });
+
+//     await page.setUserAgent(userAgent);
+//     await page.setViewport({
+//       width: 1280 + Math.floor(Math.random() * 100),
+//       height: 800 + Math.floor(Math.random() * 100)
+//     });
+
+//     await page.setExtraHTTPHeaders({
+//       'Accept-Language': 'en-US,en;q=0.9',
+//       'Sec-CH-UA': '"Chromium";v="114", "Not.A/Brand";v="8"',
+//       'Sec-CH-UA-Mobile': '?0',
+//       'Sec-CH-UA-Platform': '"Windows"'
+//     });
+
+//     // Wait before going to profile
+//     await delay(getRandomDelay(3000, 6000));
+
+//     // Check IP
+//     let publicIP = 'unknown';
+//     await page.goto('https://api.ipify.org', { waitUntil: 'networkidle2' });
+//     publicIP = await page.evaluate(() => document.body.innerText.trim());
+//     console.log(`🌐 Public IP: ${publicIP}`);
+
+//     // Smart cookie load
+//     const meta = readCookieMeta();
+//     if (fs.existsSync(COOKIES_PATH) && meta?.proxyIp === publicIP) {
+//       try {
+//         const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf8'));
+//         await page.setCookie(...cookies);
+//         console.log('🍪 Loaded cookies (same IP)');
+//       } catch (err) {
+//         console.warn('⚠️ Failed to load cookies:', err.message);
+//       }
+//     } else {
+//       console.log('🚫 Skipping cookie load (IP mismatch or new IP)');
+//     }
+
+//     await delay(getRandomDelay(3000, 5000)); // More delay to simulate human pacing
+
+//     await page.goto(PROFILE_URL, { waitUntil: 'networkidle2', timeout: 60000 });
+
+//     // Check for Cloudflare or rate-limit
+//     const isBlocked = await page.evaluate(() =>
+//       document.title.includes('Attention Required') ||
+//       document.body.innerText.includes('Verifying you are human') ||
+//       document.body.innerText.includes('Sorry, you have been blocked')
+//       // ||
+//       // document.body.innerText.includes('too fast')
+//     );
+
+//     if (isBlocked) {
+//       console.warn(`🛑 BLOCKED or rate-limited [${publicIP}]`);
+//       updateProxyLog(publicIP, 'blocked');
+//       const html = await page.content();
+//       // fs.writeFileSync(`debug-${Date.now()}.html`, html);
+//       await browser.close();
+//       return [];
+//     }
+
+//     console.log(`✅ SUCCESS — Page loaded [${publicIP}]`);
+//     updateProxyLog(publicIP, 'success');
+
+//     await page.waitForSelector('[data-id]', { timeout: 20000 });
+
+//     const posts = await page.evaluate((PROFILE_HANDLE) => {
+//       const wrappers = Array.from(document.querySelectorAll('[data-id]')).slice(0, 3);
+//       const results = [];
+
+//       for (const wrapper of wrappers) {
+//         if (wrapper.querySelector('[data-testid="boosted-status"]')) continue;
+//         const textWrapper = wrapper.querySelector('.status__content-wrapper');
+//         if (!textWrapper) continue;
+
+//         const text = Array.from(textWrapper.querySelectorAll('p'))
+//           .map(p => p.innerText.trim())
+//           .filter(Boolean)
+//           .filter((line, i, arr) => arr.indexOf(line) === i)
+//           .join('\n');
+
+//         const postId = wrapper.getAttribute('data-id');
+//         const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
+//         const time = wrapper.querySelector('time')?.getAttribute('title');
+
+//         results.push({ text, postId, postUrl, uploadTime: time });
+//       }
+
+//       return results;
+//     }, PROFILE_HANDLE);
+
+//     // Save new cookies
+//     const cookies = await page.cookies();
+//     fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
+//     writeCookieMeta(publicIP);
+
+//     await browser.close();
+
+//     return (posts || []).map(post => ({
+//       ...post,
+//       fetchedAt: new Date().toISOString()
+//     }));
+
+//   } catch (err) {
+//     console.error(`❌ Scrape error with proxy ${proxy.ip}:`, err.message);
+//     if (browser) await browser.close();
+//     await delay(3000);
+//     return [];
+//   }
+// }
+
+
 async function getPosts() {
   const userAgent = getRandomElement(USER_AGENTS);
   const successLogPath = path.resolve(__dirname, 'proxy_success_log.json');
   const COOKIE_META_PATH = path.resolve(__dirname, 'cookie_meta.json');
 
   const PROXIES = [
+    // {
+    //   ip: 'http://104.239.105.125:6655',
+    //   username: 'hsbfilue',
+    //   password: 'p0ytnvylp8e0'
+    // },
+    // {
+    //   ip: 'http://104.239.105.125:6655',
+    //   username: 'ybncrorx',
+    //   password: 't44turw1a264'
+    // }
+    // ,
     {
       ip: 'http://104.239.105.125:6655',
-      username: 'hsbfilue',
-      password: 'p0ytnvylp8e0'
+      username: 'hyoepnhl',
+      password: 'nyx9xwk07625'
     },
     {
       ip: 'http://104.239.105.125:6655',
-      username: 'ybncrorx',
-      password: 't44turw1a264'
+      username: 'vsfmbdkk',
+      password: 'rhyfca4l1pfl'
     }
   ];
 
@@ -1474,6 +2070,7 @@ async function getPosts() {
       const launchArgs = [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        // `--proxy-server=${proxy.ip}`
       ];
 
       browser = await puppeteer.launch({
@@ -1497,8 +2094,8 @@ async function getPosts() {
 
       await page.setUserAgent(userAgent);
       await page.setViewport({
-        width: 1280 + Math.floor(Math.random() * 100),
-        height: 800 + Math.floor(Math.random() * 100)
+        width: 1280,
+        height: 2000
       });
 
       await page.setExtraHTTPHeaders({
@@ -1508,9 +2105,8 @@ async function getPosts() {
         'Sec-CH-UA-Platform': '"Windows"'
       });
 
-      await delay(getRandomDelay(3000, 6000));
+      // await delay(getRandomDelay(3000, 6000));
 
-      // Get IP and print
       try {
         await page.goto('https://api.ipify.org', { waitUntil: 'networkidle2', timeout: 15000 });
         publicIP = await page.evaluate(() => document.body.innerText.trim());
@@ -1519,7 +2115,6 @@ async function getPosts() {
         console.warn('⚠️ Could not retrieve IP:', ipErr.message);
       }
 
-      // Load cookies if IP matches
       const meta = readCookieMeta();
       if (fs.existsSync(COOKIES_PATH) && meta?.proxyIp === publicIP) {
         try {
@@ -1535,7 +2130,6 @@ async function getPosts() {
 
       await delay(getRandomDelay(3000, 5000));
 
-      // Load TruthSocial profile page
       await Promise.race([
         page.goto(PROFILE_URL, { waitUntil: 'networkidle2', timeout: 40000 }),
         new Promise((_, reject) =>
@@ -1543,7 +2137,6 @@ async function getPosts() {
         )
       ]);
 
-      // Check if blocked or empty
       const isBlockedOrEmpty = await page.evaluate(() => {
         const title = document.title.toLowerCase();
         const bodyText = document.body.innerText.toLowerCase();
@@ -1561,69 +2154,51 @@ async function getPosts() {
         console.warn(`🛑 Blocked or no valid content from TruthSocial [${publicIP}]`);
         updateProxyLog(publicIP, 'blocked/empty');
         await browser.close();
-        continue; // Try again
+        continue;
       }
 
       console.log(`✅ SUCCESS — Page loaded [${publicIP}]`);
       updateProxyLog(publicIP, 'success');
 
-      // Smooth scroll to reveal posts hidden below pinned truth
-      await page.evaluate(async () => {
+      const posts = await page.evaluate(async (PROFILE_HANDLE) => {
         const sleep = ms => new Promise(res => setTimeout(res, ms));
-        let tries = 0;
-        while (document.querySelectorAll('[data-id]').length < 4 && tries < 10) {
-          window.scrollBy(0, 300);
-          await sleep(400);
-          tries++;
-        }
-      });
+        const collected = new Map();
 
+        const readPosts = () => {
+          const wrappers = Array.from(document.querySelectorAll('[data-id]'));
+          for (const wrapper of wrappers) {
+            const postId = wrapper.getAttribute('data-id');
+            if (!postId || collected.has(postId)) continue;
 
-      try {
-        await page.waitForSelector('[data-id]', { timeout: 15000 });
-      } catch (err) {
-        console.warn(`⚠️ No post selector found — skipping [${publicIP}]`);
-        await browser.close();
-        continue;
-      }
+            const textWrapper = wrapper.querySelector('.status__content-wrapper');
+            if (!textWrapper) continue;
 
-      const posts = await page.evaluate((PROFILE_HANDLE) => {
-        // const wrappers = Array.from(document.querySelectorAll('[data-id]')).slice(0, 3);
-        const allWrappers = Array.from(document.querySelectorAll('[data-id]'));
+            const text = Array.from(textWrapper.querySelectorAll('p'))
+              .map(p => p.innerText.trim())
+              .filter(Boolean)
+              .filter((line, i, arr) => arr.indexOf(line) === i)
+              .join('\n');
 
-        const pinnedWrapper = allWrappers.find(wrapper =>
-          wrapper.innerText.includes('Pinned Truth')
-        );
+            const time = wrapper.querySelector('time')?.getAttribute('title');
+            const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
 
-        const nonPinnedWrappers = allWrappers.filter(wrapper =>
-          !wrapper.innerText.includes('Pinned Truth')
-        ).slice(0, 3); // Top 3 non-pinned
+            collected.set(postId, { text, postId, postUrl, uploadTime: time });
+          }
+        };
 
-        const wrappers = pinnedWrapper
-          ? [pinnedWrapper, ...nonPinnedWrappers]
-          : nonPinnedWrappers;
-
-        const results = [];
-
-        for (const wrapper of wrappers) {
-          if (wrapper.querySelector('[data-testid="boosted-status"]')) continue;
-          const textWrapper = wrapper.querySelector('.status__content-wrapper');
-          if (!textWrapper) continue;
-
-          const text = Array.from(textWrapper.querySelectorAll('p'))
-            .map(p => p.innerText.trim())
-            .filter(Boolean)
-            .filter((line, i, arr) => arr.indexOf(line) === i)
-            .join('\n');
-
-          const postId = wrapper.getAttribute('data-id');
-          const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
-          const time = wrapper.querySelector('time')?.getAttribute('title');
-
-          results.push({ text, postId, postUrl, uploadTime: time });
+        for (let i = 0; i < 10; i++) {
+          window.scrollBy(0, 400);
+          await sleep(800);
+          readPosts();
         }
 
-        return results;
+        for (let i = 0; i < 5; i++) {
+          window.scrollBy(0, -400);
+          await sleep(500);
+          readPosts();
+        }
+
+        return Array.from(collected.values()).slice(0, 8);
       }, PROFILE_HANDLE);
 
       const cookies = await page.cookies();
@@ -1647,7 +2222,6 @@ async function getPosts() {
   console.error('❌ All attempts failed (possibly all proxies blocked or hanging)');
   return [];
 }
-
 
 
 async function startWatcherLoop() {
@@ -1708,20 +2282,34 @@ async function startWatcherLoop() {
         });
 
 
-        const firstLine = gptResponse?.trim().split('\n')[0].trim();
+        function extractSection(gptResponse, label) {
+          const regex = new RegExp(`${label}\\)\\s*([\\s\\S]*?)(?=\\n[A-Z]\\)|$)`, 'i');
+          const match = gptResponse.match(regex);
+          return match ? match[1].trim().toLowerCase() : '';
+        }
 
-        const isLikelyRelated = /A\)\s*(Yes|The post|This message could|geopolitical|impacts the market|indirect implications)/i.test(gptResponse)
-          || /C\)\s*[\s\S]*\b([A-Z]{2,5})\b/.test(gptResponse)  // any ticker-like symbol
-          || /D\)\s*[\s\S]*(Bullish|Bearish|Neutral)/i.test(gptResponse);  // any sentiment
+        const sectionA = extractSection(gptResponse, 'A');
+        const sectionC = extractSection(gptResponse, 'C');
+        const sectionD = extractSection(gptResponse, 'D');
 
-        if (typeof gptResponse === 'string' && isLikelyRelated) {
+        console.log("— GPT Section A:", sectionA);
+        console.log("— GPT Section C:", sectionC);
+        console.log("— GPT Section D:", sectionD);
+
+        const isRelated = sectionA.includes("yes") || sectionA.includes("indirectly") || sectionA.includes("might") || sectionA.includes("could");
+        const hasTickers = /[A-Z]{2,5}/.test(sectionC) && !sectionC.includes("none");
+        const hasSentiment = /(bullish|bearish|neutral)/.test(sectionD);
+
+        // Send notifications only if A says "yes" or if there's ticker+sentiment
+        if (isRelated || (hasTickers && hasSentiment)) {
+          console.log("📈 GPT analysis suggests market relevance — sending notifications.");
           await sendNewPostNotification(post, gptResponse);
           await sendNewPostWhatsApp(post, gptResponse);
         } else {
-          console.log("🚫 Post not related to stock market, notification skipped.");
+          console.log("🚫 GPT analysis suggests no market relevance — skipping notification.");
         }
-      }
 
+      }
 
       newPosts.forEach(post => {
         history.push({ ...post, timestamp: new Date().toISOString() });
@@ -1736,7 +2324,7 @@ async function startWatcherLoop() {
       console.log(`[${now}] ⏳ No new posts.`);
     }
 
-    const delayMs = getRandomDelay(60000, 120000); // 30s to 1min
+    const delayMs = getRandomDelay(60000, 90000); // 30s to 1min
     console.log(`🕒 Next check in ${Math.round(delayMs / 1000)} seconds`);
     await delay(delayMs);
   }
