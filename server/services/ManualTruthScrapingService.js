@@ -1763,9 +1763,11 @@ import { fileURLToPath } from 'url';
 
 import { analyzePostWithGPT } from "./gptService.js";
 import Post from '../models/postModel2.js';
-import { sendNewPostNotification } from './EmailService.js';
-import { sendNewPostWhatsApp } from './WhatsappService.js';
-import { getSocketIO } from '../socket.js';
+// import { sendNewPostNotification } from './EmailService.js';
+// import { sendNewPostWhatsApp } from './WhatsappService.js';
+// import { getSocketIO } from '../socket.js';
+import { handlePostWithNotification } from './SendNotificationService.js';
+import { downloadImages } from '../utils/imageDownloader.js';
 
 puppeteer.use(StealthPlugin());
 puppeteer.use(AnonymizeUA());
@@ -1783,10 +1785,10 @@ const __dirname = path.dirname(__filename);
 
 const PROFILE_HANDLE = process.env.PROFILE_HANDLE || 'realDonaldTrump';
 const PROFILE_URL = `https://truthsocial.com/@${PROFILE_HANDLE}`;
-const COOKIES_PATH = path.resolve(__dirname, 'cookies.json');
-const PROFILE_DIR = path.resolve(__dirname, 'puppeteer-profile');
+const COOKIES_PATH = path.resolve(__dirname, '../utils/data/cookies/cookies.json');
+const PROFILE_DIR = path.resolve(__dirname, '../utils/puppeteer/puppeteer-profile');
 
-const LAST_POST_PATH = path.resolve(__dirname, 'latest.json');
+const LAST_POST_PATH = path.resolve(__dirname, '../utils/data/posts/latest.json');
 const CHECK_INTERVAL_MS = parseInt(process.env.CHECK_INTERVAL_MS || '60000');
 const MAX_HISTORY = 50;
 const MAX_VISIBLE_POSTS = 6;
@@ -2008,8 +2010,8 @@ function hasSeenPost(history, postId) {
 
 async function getPosts() {
   const userAgent = getRandomElement(USER_AGENTS);
-  const successLogPath = path.resolve(__dirname, 'proxy_success_log.json');
-  const COOKIE_META_PATH = path.resolve(__dirname, 'cookie_meta.json');
+  const successLogPath = path.resolve(__dirname, '../utils/data/logs/proxy_success_log.json');
+  const COOKIE_META_PATH = path.resolve(__dirname, '../utils/data/cookies/cookie_meta.json');
 
   const PROXIES = [
     // {
@@ -2182,7 +2184,24 @@ async function getPosts() {
             const time = wrapper.querySelector('time')?.getAttribute('title');
             const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
 
-            collected.set(postId, { text, postId, postUrl, uploadTime: time });
+            // Extract video URLs
+            const videoSources = Array.from(wrapper.querySelectorAll('video source'))
+              .map(el => el.getAttribute('src'))
+              .filter(Boolean);
+
+            // Extract image URLs
+            const imageUrls = Array.from(wrapper.querySelectorAll('.media-gallery img'))
+              .map(img => img.getAttribute('src'))
+              .filter(Boolean);
+
+            collected.set(postId, {
+              text,
+              postId,
+              postUrl,
+              uploadTime: time,
+              postImagesUrl: imageUrls,
+              postVideoUrl: videoSources,
+            });
           }
         };
 
@@ -2249,10 +2268,22 @@ async function startWatcherLoop() {
         }
 
         let gptResponse = null;
+        let imagePaths = [];
         try {
-          gptResponse = await analyzePostWithGPT(post.text);
+          imagePaths = await downloadImages(post.postImagesUrl || [], post.postId);
+          console.log("ImagePath;-", imagePaths);
+          gptResponse = await analyzePostWithGPT(post.text, imagePaths);
         } catch (err) {
           console.error("❌ GPT error:", err.message);
+        } finally {
+          for (const filePath of imagePaths) {
+            try {
+              fs.unlinkSync(filePath);
+              console.log(`🗑️ Deleted image: ${filePath}`);
+            } catch (delErr) {
+              console.warn(`⚠️ Failed to delete image ${filePath}:`, delErr.message);
+            }
+          }
         }
 
         await Post.create({
@@ -2264,50 +2295,12 @@ async function startWatcherLoop() {
           fetchedAt: new Date(post.fetchedAt),
           gptResponse,
           gptAnsweredAt: new Date(),
+          postImagesUrl: post.postImagesUrl || [],
+          postVideoUrl: post.postVideoUrl || [],
         });
-
         console.log("✅ Saved to MongoDB with GPT analysis.");
 
-        // 🟢 Emit new post to all connected clients
-        const io = getSocketIO();
-        io.emit("newPost", {
-          postId: post.postId,
-          username: PROFILE_HANDLE,
-          content: post.text,
-          url: post.postUrl,
-          createdAt: new Date(post.uploadTime),
-          fetchedAt: new Date(post.fetchedAt),
-          gptResponse,
-          gptAnsweredAt: new Date(),
-        });
-
-
-        function extractSection(gptResponse, label) {
-          const regex = new RegExp(`${label}\\)\\s*([\\s\\S]*?)(?=\\n[A-Z]\\)|$)`, 'i');
-          const match = gptResponse.match(regex);
-          return match ? match[1].trim().toLowerCase() : '';
-        }
-
-        const sectionA = extractSection(gptResponse, 'A');
-        const sectionC = extractSection(gptResponse, 'C');
-        const sectionD = extractSection(gptResponse, 'D');
-
-        console.log("— GPT Section A:", sectionA);
-        console.log("— GPT Section C:", sectionC);
-        console.log("— GPT Section D:", sectionD);
-
-        const isRelated = sectionA.includes("yes") || sectionA.includes("indirectly") || sectionA.includes("might") || sectionA.includes("could");
-        const hasTickers = /[A-Z]{2,5}/.test(sectionC) && !sectionC.includes("none");
-        const hasSentiment = /(bullish|bearish|neutral)/.test(sectionD);
-
-        // Send notifications only if A says "yes" or if there's ticker+sentiment
-        if (isRelated || (hasTickers && hasSentiment)) {
-          console.log("📈 GPT analysis suggests market relevance — sending notifications.");
-          await sendNewPostNotification(post, gptResponse);
-          await sendNewPostWhatsApp(post, gptResponse);
-        } else {
-          console.log("🚫 GPT analysis suggests no market relevance — skipping notification.");
-        }
+        await handlePostWithNotification(post, gptResponse, PROFILE_HANDLE);
 
       }
 
