@@ -2014,28 +2014,83 @@ async function getPosts() {
   const COOKIE_META_PATH = path.resolve(__dirname, '../utils/data/cookies/cookie_meta.json');
 
   const PROXIES = [
-    // {
-    //   ip: 'http://104.239.105.125:6655',
-    //   username: 'hsbfilue',
-    //   password: 'p0ytnvylp8e0'
-    // },
-    // {
-    //   ip: 'http://104.239.105.125:6655',
-    //   username: 'ybncrorx',
-    //   password: 't44turw1a264'
-    // }
-    // ,
     {
-      ip: 'http://104.239.105.125:6655',
-      username: 'hyoepnhl',
-      password: 'nyx9xwk07625'
+      ip: 'http://72.1.133.47:7439',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
     },
     {
-      ip: 'http://104.239.105.125:6655',
-      username: 'vsfmbdkk',
-      password: 'rhyfca4l1pfl'
+      ip: 'http://156.237.99.207:6611',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://45.56.178.122:8467',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://156.237.16.180:7075',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://45.56.136.117:8549',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://156.237.49.104:6505',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://45.56.143.198:7021',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://156.237.45.212:6610',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://45.56.146.155:7978',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://72.1.129.97:7490',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://45.196.53.212:5600',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://156.237.49.105:6506',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://168.235.149.50:5834',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://163.123.202.124:5409',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
+    },
+    {
+      ip: 'http://156.237.52.229:7125',
+      username: 'txjehvsx',
+      password: 'dcafycd7e4f5'
     }
   ];
+
 
   // const webshareProxy = 'http://p.webshare.io:80';
   // const proxyUsername = 'txjehvsx-rotate';
@@ -2072,7 +2127,7 @@ async function getPosts() {
       const launchArgs = [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        // `--proxy-server=${proxy.ip}`
+        `--proxy-server=${proxy.ip}`
       ];
 
       browser = await puppeteer.launch({
@@ -2134,19 +2189,19 @@ async function getPosts() {
 
       await Promise.race([
         page.goto(PROFILE_URL, { waitUntil: 'networkidle2', timeout: 40000 }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('⏱️ page.goto timeout')), 45000)
-        )
+        // new Promise((_, reject) =>
+        //   setTimeout(() => reject(new Error('⏱️ page.goto timeout')), 45000)
+        // )
       ]);
 
       const isBlockedOrEmpty = await page.evaluate(() => {
         const title = document.title.toLowerCase();
         const bodyText = document.body.innerText.toLowerCase();
         return (
-          title.includes('attention required') ||
-          bodyText.includes('verifying you are human') ||
-          bodyText.includes('you are being rate limited') ||
-          bodyText.includes('sorry, you have been blocked') ||
+          // title.includes('attention required') ||
+          // bodyText.includes('verifying you are human') ||
+          // bodyText.includes('you are being rate limited') ||
+          // bodyText.includes('sorry, you have been blocked') ||
           bodyText.includes('no truths') ||
           bodyText.length < 500
         );
@@ -2154,6 +2209,19 @@ async function getPosts() {
 
       if (isBlockedOrEmpty) {
         console.warn(`🛑 Blocked or no valid content from TruthSocial [${publicIP}]`);
+
+        const safeName = publicIP.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const screenshotDir = path.resolve(__dirname, '../utils/data/screenshots');
+        const screenshotPath = path.join(screenshotDir, `${safeName}.png`);
+
+        try {
+          if (!fs.existsSync(screenshotDir)) fs.mkdirSync(screenshotDir, { recursive: true });
+          await page.screenshot({ path: screenshotPath, fullPage: true });
+          console.log(`📸 Saved screenshot: ${screenshotPath}`);
+        } catch (screenshotErr) {
+          console.warn(`⚠️ Failed to save screenshot:`, screenshotErr.message);
+        }
+
         updateProxyLog(publicIP, 'blocked/empty');
         await browser.close();
         continue;
@@ -2172,24 +2240,23 @@ async function getPosts() {
             const postId = wrapper.getAttribute('data-id');
             if (!postId || collected.has(postId)) continue;
 
+
             const textWrapper = wrapper.querySelector('.status__content-wrapper');
             if (!textWrapper) continue;
 
-            const text = Array.from(textWrapper.querySelectorAll('p'))
-              .map(p => p.innerText.trim())
-              .filter(Boolean)
-              .filter((line, i, arr) => arr.indexOf(line) === i)
-              .join('\n');
+            const contentDiv = textWrapper.querySelector('div.relative');
+            const contentP = contentDiv?.querySelector('p');
+            const text = contentP?.innerText?.trim() || '';
 
             const time = wrapper.querySelector('time')?.getAttribute('title');
             const postUrl = `https://truthsocial.com/@${PROFILE_HANDLE}/posts/${postId}`;
 
-            // Extract video URLs
-            const videoSources = Array.from(wrapper.querySelectorAll('video source'))
-              .map(el => el.getAttribute('src'))
-              .filter(Boolean);
+            // Deduplicated video URLs
+            // Extract only one 720p video URL
+            const video720 = wrapper.querySelector('video source[type="video/mp4"][data-quality="720p"]');
+            const videoUrl = video720?.getAttribute('src') || null;
 
-            // Extract image URLs
+            // Image URLs inside media gallery
             const imageUrls = Array.from(wrapper.querySelectorAll('.media-gallery img'))
               .map(img => img.getAttribute('src'))
               .filter(Boolean);
@@ -2200,10 +2267,11 @@ async function getPosts() {
               postUrl,
               uploadTime: time,
               postImagesUrl: imageUrls,
-              postVideoUrl: videoSources,
+              postVideoUrl: videoUrl ? [videoUrl] : []
             });
           }
         };
+
 
         for (let i = 0; i < 10; i++) {
           window.scrollBy(0, 400);
@@ -2317,7 +2385,7 @@ async function startWatcherLoop() {
       console.log(`[${now}] ⏳ No new posts.`);
     }
 
-    const delayMs = getRandomDelay(60000, 90000); // 30s to 1min
+    const delayMs = getRandomDelay(5000, 5000); // 30s to 1min
     console.log(`🕒 Next check in ${Math.round(delayMs / 1000)} seconds`);
     await delay(delayMs);
   }
