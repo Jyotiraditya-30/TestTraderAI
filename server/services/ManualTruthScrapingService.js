@@ -2013,83 +2013,83 @@ async function getPosts() {
   const successLogPath = path.resolve(__dirname, '../utils/data/logs/proxy_success_log.json');
   const COOKIE_META_PATH = path.resolve(__dirname, '../utils/data/cookies/cookie_meta.json');
 
-  const PROXIES = [
-    {
-      ip: 'http://72.1.133.47:7439',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.99.207:6611',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://45.56.178.122:8467',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.16.180:7075',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://45.56.136.117:8549',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.49.104:6505',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://45.56.143.198:7021',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.45.212:6610',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://45.56.146.155:7978',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://72.1.129.97:7490',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://45.196.53.212:5600',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.49.105:6506',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://168.235.149.50:5834',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://163.123.202.124:5409',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    },
-    {
-      ip: 'http://156.237.52.229:7125',
-      username: 'txjehvsx',
-      password: 'dcafycd7e4f5'
-    }
-  ];
+ const PROXIES = [
+  {
+    ip: 'http://72.1.133.47:7439',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.99.207:6611',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.178.122:8467',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.16.180:7075',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.136.117:8549',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.49.104:6505',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.143.198:7021',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.45.212:6610',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.146.155:7978',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://72.1.129.97:7490',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.196.53.212:5600',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.49.105:6506',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://168.235.149.50:5834',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://163.123.202.124:5409',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.52.229:7125',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  }
+];
 
 
   // const webshareProxy = 'http://p.webshare.io:80';
@@ -2223,7 +2223,7 @@ async function getPosts() {
         }
 
         updateProxyLog(publicIP, 'blocked/empty');
-        await browser.close();
+        // await browser.close();
         continue;
       }
 
@@ -2385,7 +2385,7 @@ async function startWatcherLoop() {
       console.log(`[${now}] ⏳ No new posts.`);
     }
 
-    const delayMs = getRandomDelay(5000, 5000); // 30s to 1min
+    const delayMs = getRandomDelay(500000, 500000); // 30s to 1min
     console.log(`🕒 Next check in ${Math.round(delayMs / 1000)} seconds`);
     await delay(delayMs);
   }
