@@ -2015,81 +2015,132 @@ async function getPosts() {
 
  const PROXIES = [
   {
-    ip: 'http://72.1.133.47:7439',
+    ip: 'http://156.237.22.240:6141',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.99.207:6611',
+    ip: 'http://207.228.19.227:5595',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://45.56.178.122:8467',
+    ip: 'http://168.235.150.165:5449',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.16.180:7075',
+    ip: 'http://45.56.136.110:8542',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://45.56.136.117:8549',
+    ip: 'http://45.196.34.63:5375',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.49.104:6505',
+    ip: 'http://62.164.243.21:9012',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://45.56.143.198:7021',
+    ip: 'http://156.237.56.49:6948',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.45.212:6610',
+    ip: 'http://62.164.230.216:9127',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://45.56.146.155:7978',
+    ip: 'http://69.30.77.21:6761',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://72.1.129.97:7490',
+    ip: 'http://156.237.49.17:6418',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://45.196.53.212:5600',
+    ip: 'http://207.135.196.8:6923',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.49.105:6506',
+    ip: 'http://156.237.51.128:6528',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://168.235.149.50:5834',
+    ip: 'http://156.237.17.179:6574',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://163.123.202.124:5409',
+    ip: 'http://192.53.71.212:5581',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   },
   {
-    ip: 'http://156.237.52.229:7125',
+    ip: 'http://207.135.196.151:7066',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.143.66:6889',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.18.82:5979',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.98.21:6925',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://204.10.80.131:7564',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://208.66.74.103:5418',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://63.246.132.160:5478',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://45.56.158.244:6900',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://69.30.76.98:6494',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://130.180.239.71:6710',
+    username: 'txjehvsx',
+    password: 'dcafycd7e4f5'
+  },
+  {
+    ip: 'http://156.237.16.94:6989',
     username: 'txjehvsx',
     password: 'dcafycd7e4f5'
   }
 ];
+
 
 
   // const webshareProxy = 'http://p.webshare.io:80';
@@ -2385,7 +2436,7 @@ async function startWatcherLoop() {
       console.log(`[${now}] ⏳ No new posts.`);
     }
 
-    const delayMs = getRandomDelay(500000, 500000); // 30s to 1min
+    const delayMs = getRandomDelay(60000, 90000); // 30s to 1min
     console.log(`🕒 Next check in ${Math.round(delayMs / 1000)} seconds`);
     await delay(delayMs);
   }

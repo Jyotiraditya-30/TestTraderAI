@@ -1,30 +1,6 @@
 {
-  "72.1.179.140": "success",
-  "72.1.182.133": "success",
-  "72.1.133.47": "blocked/empty",
-  "204.10.80.16": {
-    "status": "success",
-    "lastUsed": "2025-06-30T16:43:47.007Z"
-  },
-  "69.30.77.106": "success",
-  "156.237.99.207": "blocked/empty",
-  "78.31.204.70": "success",
-  "208.73.41.47": "success",
-  "45.56.178.122": "blocked/empty",
-  "156.237.16.180": "blocked/empty",
-  "45.56.136.117": "blocked/empty",
-  "156.237.49.104": "blocked/empty",
-  "45.56.143.198": "blocked/empty",
-  "156.237.45.212": "blocked/empty",
-  "45.56.146.155": "blocked/empty",
-  "72.1.129.97": "blocked/empty",
-  "69.30.74.172": "success",
-  "107.180.190.122": "success",
-  "45.196.53.212": "blocked/empty",
-  "156.237.49.105": "blocked/empty",
-  "168.235.149.50": "blocked/empty",
-  "107.180.185.47": "success",
-  "74.122.61.201": "success",
-  "163.123.202.124": "blocked/empty",
-  "156.237.52.229": "blocked/empty"
+  "156.237.52.229": "blocked/empty",
+  "14.98.227.62": "success",
+  "156.237.17.179": "blocked/empty",
+  "45.56.143.66": "blocked/empty"
 }
